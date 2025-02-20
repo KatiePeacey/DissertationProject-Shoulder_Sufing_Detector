@@ -1,10 +1,12 @@
 import cv2
 import os
+import time
 from ultralytics import YOLO
 from playsound import playsound 
 import threading
 import tkinter as tk
-
+from functools import partial
+from PIL import Image, ImageTk
 
 # load model and video
 yolo = YOLO('yolov8s.pt')
@@ -60,6 +62,7 @@ def run_detection():
             if not dimmed:
                 print("Potential shoulder surfer! Decreasing brightness")
                 playsound(alert_sound)
+                last_alert_time = time.time()
                 dim_screen()
                 dimmed = True
         else:
@@ -68,19 +71,39 @@ def run_detection():
                 reset_brightness()
                 dimmed = False
 
+        # just for demo purposes  
+        show_frame(frame)
+
     window.update_idletasks()
     window.update()
+
+
+# Display video in Tkinter - demo purposes
+def show_frame(frame):
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+    img = Image.fromarray(frame)
+    imgtk = ImageTk.PhotoImage(image=img)
+    video_label.imgtk = imgtk  # Keep reference
+    video_label.config(image=imgtk)
 
 # Create the GUI
 window = tk.Tk()
 window.title("Shoulder Surfing Detector")
-window.geometry('300x100') 
+window.geometry('1430x768') 
+# window.geometry('300x100') 
 
-start_button = tk.Button(window, text="Start Detection", command=start_detection)
-start_button.pack()
+video_label = tk.Label(window)
+video_label.pack()
 
-stop_button = tk.Button(window, text="Stop Detection", command=stop_detection, state=tk.DISABLED)
-stop_button.pack()
+button_frame = tk.Frame(window)
+button_frame.pack(side=tk.BOTTOM)
+
+start_button = tk.Button(button_frame, text="Start Detection", command=start_detection, width=20, height=2)
+#start_button.pack()
+start_button.grid(row=0, column=0)
+stop_button = tk.Button(button_frame, text="Stop Detection", command=stop_detection, state=tk.DISABLED, width=20, height=2)
+#stop_button.pack()
+stop_button.grid(row=0, column=1)
 
 window.mainloop()
 videoCap.release()
