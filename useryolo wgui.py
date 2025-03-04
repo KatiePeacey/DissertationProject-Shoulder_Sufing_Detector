@@ -38,13 +38,18 @@ class Window(customtkinter.CTk):
         self.sidebar_button_stop = customtkinter.CTkButton(self.sidebar_frame, text="Stop Detection", command=self.stop_detection)
         self.sidebar_button_stop.grid(row=2, column=0, padx=20, pady=10)
 
+        self.sidebar_button_stats = customtkinter.CTkButton(self.sidebar_frame, text="Stats", command=self.stats_button)
+        self.sidebar_button_stats.grid(row=3, column=0, padx=20, pady=10)
+
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
 
-    
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
+
+    def stats_button(self):
+        print("stats button click")
 
     # dim screen brightness (will have to be changed for windows)
     def dim_screen(self):
@@ -91,7 +96,7 @@ class Window(customtkinter.CTk):
             if person_count > 1:
                 if not dimmed:
                     print("Potential shoulder surfer! Decreasing brightness")
-                    playsound(alert_sound)
+                    # playsound(alert_sound)
                     self.dim_screen()
                     dimmed = True
             else:
