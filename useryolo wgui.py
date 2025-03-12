@@ -5,7 +5,8 @@ from playsound import playsound
 import threading
 import tkinter as tk
 import customtkinter
-
+from PIL import Image, ImageTk
+import customtkinter as ctk
 
 # load model and video
 yolo = YOLO('yolov8s.pt')
@@ -19,7 +20,7 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("blue") 
 
 # Create the GUI
-class Window(customtkinter.CTk):
+class Window(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Shoulder Surfing Detector") 
@@ -41,6 +42,10 @@ class Window(customtkinter.CTk):
         self.sidebar_button_stats = customtkinter.CTkButton(self.sidebar_frame, text="Stats", command=self.stats_button)
         self.sidebar_button_stats.grid(row=3, column=0, padx=20, pady=10)
 
+        self.video_label = ctk.CTkLabel(self, text="")
+        self.video_label.pack(pady=20)
+        self.show_frame()
+
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
 
@@ -56,6 +61,23 @@ class Window(customtkinter.CTk):
         os.system("brightness 0.00")
     def reset_brightness(self):
         os.system("brightness 1.0")
+
+    def show_frame(self):
+        """Capture frame from webcam and display it in the label."""
+        ret, frame = self.cap.read()  # ✅ Get video frame
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+            img = Image.fromarray(frame)  # Convert to PIL image
+            imgtk = ImageTk.PhotoImage(image=img)  # Convert to Tkinter-compatible image
+
+            # ✅ Use self.video_label
+            self.video_label.imgtk = imgtk  # Prevent garbage collection
+            self.video_label.configure(image=imgtk)  # Update label with new image
+
+        # ✅ Use self.show_frame in after()
+        self.video_label.after(10, self.show_frame)  # Call function every 10ms
+
+
 
     def start_detection(self):
         global running
@@ -104,6 +126,9 @@ class Window(customtkinter.CTk):
                     print("Only one person left. Restoring brightness.")
                     self.reset_brightness()
                     dimmed = False
+
+            # Start video stream
+            show_frame(self)
 
         window.update_idletasks()
         window.update()
