@@ -7,26 +7,23 @@ import customtkinter
 from ultralytics import YOLO
 from PIL import Image, ImageTk
 
-# Load model and video
 yolo = YOLO('yolov8s.pt')
 videoCap = cv2.VideoCapture(0)
 print("Camera ON")
 
-# Load the alert sound
 alert_sound = "warning2.mp3"
 
-# Adjust screen brightness (platform-specific)
 def dim_screen():
     try:
         import screen_brightness_control as sbc
-        sbc.set_brightness(10)  # Dim screen
+        sbc.set_brightness(10)
     except ImportError:
         os.system("brightness 0.03")
 
 def reset_brightness():
     try:
         import screen_brightness_control as sbc
-        sbc.set_brightness(100)  # Restore brightness
+        sbc.set_brightness(100)
     except ImportError:
         os.system("brightness 1.0")
 
@@ -86,12 +83,12 @@ class Window(customtkinter.CTk):
             if not ret:
                 continue
 
-            results = list(yolo.track(frame, stream=True))  # Convert generator to list
+            results = list(yolo.track(frame, stream=True))
             person_count = 0
 
             for result in results:
                 for box in result.boxes:
-                    if box.conf[0] > 0.4:  # Confidence threshold
+                    if box.conf[0] > 0.4:
                         cls = int(box.cls[0])
                         if cls == 0:
                             person_count += 1
